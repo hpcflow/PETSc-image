@@ -1,0 +1,76 @@
+name: build-push
+run-name: 'build-push: versioned? ${{ github.event.inputs.versioned }} - latest? ${{ github.event.inputs.latest }}'
+
+on:
+  workflow_dispatch:
+    inputs:
+      petsc_version:
+        description: 'PETSc version'
+        required: true
+        type: string
+        default: '3.18.4'
+      gcc_version:
+        description: 'GCC version'
+        required: true
+        type: string
+        default: '12'
+      versioned:
+        description: 'Push with versioned tag?'
+        required: true
+        type: boolean
+        default: true
+      latest:
+        description: 'Push with "latest" tag?'
+        required: true
+        type: boolean
+        default: true
+      target:
+        description: 'ghcr.io repository where image will be pushed to'
+        required: true
+        type: string
+        default: "hpcflow"
+
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          load: true
+          tags: petsc:testing
+
+      - name: Create tag from petsc and gcc versions
+        id: tag
+        run: |
+          petsc_version=$(echo $(docker run petsc:testing echo $PETSC_DIR | cut -d'-' -f 2))
+          gcc_version=$(echo $(docker run petsc:testing gcc --version) | cut -d' ' -f 4 | head --lines 1)
+          echo "versions=${petsc_version}_gcc${gcc_version}" >> $GITHUB_OUTPUT
+  
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push versioned
+        if: github.event.inputs.versioned == 'true'
+        run: |
+          docker image tag petsc:testing ghcr.io/${{ github.event.inputs.target }}/petsc:${{ steps.tag.outputs.versions }}
+          docker push ghcr.io/${{ github.event.inputs.target }}/petsc:${{ steps.tag.outputs.versions }}
+
+      - name: Push latest
+        if: github.event.inputs.latest == 'true'
+        run: |
+          docker image tag petsc:testing ghcr.io/${{ github.event.inputs.target }}/petsc:latest
+          docker push ghcr.io/${{ github.event.inputs.target }}/petsc:latest
