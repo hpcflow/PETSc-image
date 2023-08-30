@@ -55,7 +55,7 @@ jobs:
       - name: Create tag from petsc and gcc versions
         id: tag
         run: |
-          petsc_version=$(echo $(docker run petsc:testing echo $PETSC_DIR | cut -d'-' -f 2))
+          petsc_version=$(echo $(docker run petsc:testing grep "^Version:" /petsc-${{ github.event.inputs.petsc_version }}/PKG-INFO | cut -d" " -f 2))
           gcc_version=$(echo $(docker run petsc:testing gcc --version) | cut -d' ' -f 4 | head --lines 1)
           echo "versions=${petsc_version}_gcc${gcc_version}" >> $GITHUB_OUTPUT
   
