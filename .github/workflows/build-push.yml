@@ -1,5 +1,5 @@
 name: build-push
-run-name: 'build-push: versioned? ${{ github.event.inputs.versioned }} - latest? ${{ github.event.inputs.latest }}'
+run-name: 'build-push: ${{ github.event.inputs.petsc_version }}_gcc${{ github.event.inputs.gcc_version }} - versioned? ${{ github.event.inputs.versioned }} - latest? ${{ github.event.inputs.latest }} - target? ${{ github.event.inputs.target }}'
 
 on:
   workflow_dispatch:
@@ -48,6 +48,9 @@ jobs:
           context: .
           load: true
           tags: petsc:testing
+          build-args: |
+            PETSC_VERSION=${{ github.event.inputs.petsc_version }}
+            GCC_V=${{ github.event.inputs.gcc_version }}
 
       - name: Create tag from petsc and gcc versions
         id: tag
