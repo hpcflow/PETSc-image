@@ -14,5 +14,10 @@ WORKDIR /petsc-${PETSC_VERSION}
 RUN ./configure -j $(nproc) --with-fc=gfortran --with-cc=gcc --with-cxx=g++ --download-openmpi --download-fftw --download-hdf5 --download-hdf5-fortran-bindings=1 --download-zlib --with-mpi-f90module-visibility=1 --download-fblaslapack=1
 RUN make all -j $(nproc)
 
+RUN <<SysReq
+    apt-get update
+    apt-get install -y wget git software-properties-common make cmake pkg-config
+SysReq
+
 ENTRYPOINT [""]
 CMD ["bash"]
