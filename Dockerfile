@@ -18,13 +18,11 @@ RUN make all -j $(nproc)
 # Multistage
 RUN <<Clean&Keep
     rm -r gcc/externalpackages gcc/obj
-    mkdir /KEEP
-    mv /petsc* /KEEP
 Clean&Keep
 
 FROM gcc:${GCC_V}
 ARG PETSC_VERSION=3.19
-COPY --from=0 /KEEP* /
+COPY --from=0 /petsc-${PETSC_VERSION} /petsc-${PETSC_VERSION}
 ENV PETSC_DIR=${PWD}/petsc-${PETSC_VERSION}
 ENV PETSC_ARCH=gcc${GCC_V}
 WORKDIR /petsc-${PETSC_VERSION}
