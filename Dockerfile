@@ -1,4 +1,5 @@
-FROM ubuntu:latest
+ARG GCC_V=13.2
+FROM gcc:${GCC_V}
 
 RUN <<SysReq
     apt-get update
@@ -6,13 +7,6 @@ RUN <<SysReq
     add-apt-repository ppa:ubuntu-toolchain-r/test -y
     apt-get update
 SysReq
-
-ARG GCC_V=13
-RUN apt-get install -y gcc-${GCC_V} gfortran-${GCC_V} g++-${GCC_V}
-RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${GCC_V} 100 \
-          --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-${GCC_V} \
-          --slave /usr/bin/g++      g++      /usr/bin/g++-${GCC_V} \
-          --slave /usr/bin/gcov     gcov     /usr/bin/gcov-${GCC_V}
 
 ARG PETSC_VERSION=3.19
 RUN <<GetPETSc
