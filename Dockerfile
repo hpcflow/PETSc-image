@@ -1,13 +1,6 @@
 ARG GCC_V=13.2
 FROM gcc:${GCC_V}
 
-RUN <<SysReq
-    apt-get update
-    apt-get install -y wget git software-properties-common make cmake pkg-config
-    add-apt-repository ppa:ubuntu-toolchain-r/test -y
-    apt-get update
-SysReq
-
 ARG PETSC_VERSION=3.19
 RUN <<GetPETSc
     wget https://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-${PETSC_VERSION}.tar.gz
