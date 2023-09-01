@@ -14,6 +14,20 @@ WORKDIR /petsc-${PETSC_VERSION}
 RUN ./configure -j $(nproc) --with-fc=gfortran --with-cc=gcc --with-cxx=g++ --download-openmpi --download-fftw --download-hdf5 --download-hdf5-fortran-bindings=1 --download-zlib --with-mpi-f90module-visibility=1 --download-fblaslapack=1
 RUN make all -j $(nproc)
 
+
+# Multistage
+RUN <<Clean&Keep
+    rm -r gcc/externalpackages gcc/obj
+    mkdir /KEEP
+    mv /petsc* /KEEP
+Clean&Keep
+
+FROM gcc:${GCC_V}
+ARG PETSC_VERSION=3.19
+COPY --from=0 /KEEP* /
+ENV PETSC_DIR=${PWD}/petsc-${PETSC_VERSION}
+ENV PETSC_ARCH=gcc${GCC_V}
+WORKDIR /petsc-${PETSC_VERSION}
 RUN <<SysReq
     apt-get update
     apt-get install -y wget git software-properties-common make cmake pkg-config
