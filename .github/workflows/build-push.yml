@@ -56,7 +56,7 @@ jobs:
         id: tag
         run: |
           petsc_version=$(echo $(docker run petsc:testing grep "^Version:" /petsc-${{ github.event.inputs.petsc_version }}/PKG-INFO | cut -d" " -f 2))
-          gcc_version=$(echo $(docker run petsc:testing gcc --version) | cut -d' ' -f 4 | head --lines 1)
+          gcc_version=$(echo $(docker run petsc:testing gcc --version | head --lines 1 | rev| cut -d' ' -f 1 | rev))
           echo "versions=${petsc_version}_gcc${gcc_version}" >> $GITHUB_OUTPUT
   
       - name: Log in to the Container registry
